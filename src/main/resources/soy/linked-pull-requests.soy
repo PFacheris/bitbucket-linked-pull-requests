@@ -1,0 +1,65 @@
+{namespace me.facheris}
+
+/**
+ * @param referencesToPullRequests
+ */
+{template .prOverviewPanel}
+    {call bitbucket.feature.pullRequest.relatedEntitiesWebPanel}
+        {param linkText: $referencesToPullRequests.length == 1 ? 'Reference to Another PR' : 'References To Other PRs' /}
+        {param linkHref: '#' /}
+        {param iconClass: 'aui-icon aui-icon-small aui-iconfont-devtools-pull-request' /}
+        {param count: $referencesToPullRequests.length /}
+        {param extraClasses: 'mycompany-todos-link'  /}
+    {/call}
+    <ul class="references-to-pull-requests-list">
+        {foreach $referenceToPullRequest in $referencesToPullRequests}
+            <li data-reference-to-pull-request-id="{$referenceToPullRequest.id}">
+                <a href="{$referenceToPullRequest.link}">
+                    {$referenceToPullRequest.number}
+                </a>
+                <a class="aui-icon aui-icon-small aui-iconfont-close-dialog remove" href="#"></a>
+            </li>
+        {/foreach}
+    </ul>
+{/template}
+
+/**
+ * @param projectOptions 
+ */
+{template .referenceToPullRequestModal}
+    <form id="reference-to-pull-request-create-form" class="aui">
+        <fieldset>
+            {call aui.form.selectField }
+                {param id: 'project' /}
+                {param options: $projectOptions /}
+                {param isRequired: true /}
+                {param labelContent: 'Project:' /}
+                {param descriptionText: 'Name of the project the pull request\'s repo belongs to.' /}
+                {param errorTexts: null /}
+            {/call}
+            {call aui.form.valueField}
+                {param id: 'repo' /}
+                {param options: [] /}
+                {param isDisabled: true /}
+                {param isRequired: true /}
+                {param labelContent: 'Repository:' /}
+                {param descriptionText: 'Name of the repository the pull request belongs to.' /}
+                {param errorTexts: null /}
+                {param disabled: true /}
+            {/call}
+            {call aui.form.textField}
+                {param id: 'number' /}
+                {param value: '' /}
+                {param isRequired: true /}
+                {param labelContent: 'PR Number:' /}
+                {param descriptionText: 'Number of the pull request to link.' /}
+                {param errorTexts: null /}
+            {/call}
+            <div class="buttons-container">
+                <div class="buttons">
+                    <input class="button submit" type="submit" value="Add" id="reference-to-pull-request-create-button">
+                </div>
+            </div>
+        </fieldset>
+    </form>
+{/template}
