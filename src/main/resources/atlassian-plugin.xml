@@ -30,4 +30,8 @@
         <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
     </client-resource>
 
+    <rest key="linkedPullRequestsRest" path="/linked-pull-requests" version="1.0">
+        <description>Provides hello world services.</description>
+    </rest>
+
 </atlassian-plugin>
