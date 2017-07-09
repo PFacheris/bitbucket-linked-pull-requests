@@ -4,66 +4,130 @@
     Facheris.LINKED_PULL_REQUESTS = Facheris.LINKED_PULL_REQUESTS || {};
 
     // Deal with the nitty-gritty of localStorage
-    function storageKey(pullRequestJson) {
-        var repo = pullRequestJson.toRef.repository;
-        var proj = repo.project;
-        return 'facheris.linkedpullrequests.pullrequest.' + proj.key + '/' + repo.slug + '/' + pullRequestJson.id;
-    }
-    var storage = window.localStorage ? {
-        getReferencesToPullRequests : function(pullRequestJson) {
-            var item = localStorage.getItem(storageKey(pullRequestJson));
-            try {
-                return JSON.parse(item) || [];
-            } catch(e) {
-                return [];
-            }
+    var storage = {
+        getRepositoryId: function(project, repo) {
+            var deferred = new $.Deferred();
+            var url = require('bitbucket/util/navbuilder')
+                .rest()
+                .project(project)
+                .repo(repo)
+                .build();
+            require('bitbucket/util/server').rest({
+                url: url
+            }).done(function(data) {
+                deferred.resolve(data['id']);
+            })
+            .fail(function(data) {
+                deferred.reject();
+            });
+            return deferred.promise();
         },
-        putReferencesToPullRequests : function(pullRequestJson, referencesToPullRequests) {
-            localStorage.setItem(storageKey(pullRequestJson), JSON.stringify(referencesToPullRequests));
+        getLinkedPullRequests : function() {
+            var deferred = new $.Deferred();
+            var url = require('bitbucket/util/navbuilder')
+                .rest('linked-pull-requests')
+                .currentPullRequest()
+                .build();
+            require('bitbucket/util/server').rest({
+                url: url
+            }).done(function(data) {
+                var links = $.map(data['links'], function(link) {
+                    link['link'] = require('bitbucket/util/navbuilder')
+                        .project(link.project)
+                        .repo(link.slug)
+                        .pullRequest(link.pullRequestId)
+                        .build();
+                    return link;
+                });
+                deferred.resolve(links);
+            })
+            .fail(function(data) {
+                deferred.reject(data);
+            });
+            return deferred.promise();
+        },
+        postLinkedPullRequest : function(linkedPullRequest) {
+            var deferred = new $.Deferred();
+            var url = require('bitbucket/util/navbuilder')
+                .rest('linked-pull-requests')
+                .currentPullRequest()
+                .build();
+            require('bitbucket/util/server').rest({
+                url: url,
+                method: 'POST',
+                data: JSON.stringify(linkedPullRequest)
+            }).done(function(data) {
+                var links = $.map(data['links'], function(link) {
+                    link['link'] = require('bitbucket/util/navbuilder')
+                        .project(link.project)
+                        .repo(link.slug)
+                        .pullRequest(link.pullRequestId)
+                        .build();
+                    return link;
+                });
+                deferred.resolve(links);
+            })
+            .fail(function(data) {
+                deferred.reject(data);
+                return data
+            });
+            return deferred.promise();
+        },
+        deleteLinkedPullRequest : function(id) {
+            var deferred = new $.Deferred();
+            var url = require('bitbucket/util/navbuilder')
+                .rest('linked-pull-requests')
+                .currentPullRequest()
+                .addPathComponents('linked', id)
+                .build();
+            require('bitbucket/util/server').rest({
+                url: url,
+                method: 'DELETE'
+            }).done(function(data) {
+                deferred.resolve(data);
+            })
+            .fail(function(data) {
+                deferred.reject(data);
+            });
+            return deferred.promise();
         }
-    } : {
-        getReferencesToPullRequests : function() {},
-        putReferencesToPullRequests : function() {}
     };
-
-    /**
-     * The client-condition function takes in the context
-     * before it is transformed by the client-context-provider.
-     * If it returns a truthy value, the panel will be displayed.
-     */
-    function hasAnyReferencesToPullRequests(context) {
-        var referencesToPullRequests = storage.getReferencesToPullRequests(context['pullRequest']);
-        return referencesToPullRequests.length;
-    }
 
     /**
      * The client-context-provider function takes in context and transforms
      * it to match the shape our template requires.
      */
-    function getReferencesToPullRequestsStats(context) {
-        var referencesToPullRequests = storage.getReferencesToPullRequests(context['pullRequest']);
+    function getLinkedPullRequestsStats(context) {
+        storage.getLinkedPullRequests()
+            .done(function(linkedPullRequests) {
+                $('#linked-pull-requests-panel-container').replaceWith(
+                    me.facheris.prOverviewPanel({
+                        linkedPullRequests: linkedPullRequests 
+                    })
+                );
+            });
         return {
-            referencesToPullRequests: referencesToPullRequests 
+            linkedPullRequests: [],
+            loading: true
         };
     }
 
-    function addReferenceToPullRequest(pullRequestJson, project, repo, number) {
-        var referencesToPullRequests = storage.getReferencesToPullRequests(pullRequestJson);
-        referencesToPullRequests.push({
-            id : new Date().getTime() + ":" + Math.random(),
-            project: project,
-            repo: repo,
-            number: number,
-            link: require('bitbucket/util/navbuilder').project(project).repo(repo).pullRequest(number).build()
+    function addLinkedPullRequest(project, repo, number) {
+        storage.getRepositoryId(project, repo).done(function(repositoryId) {
+            linkedPullRequest = {
+                repositoryId: repositoryId,
+                pullRequestId: number
+            };
+            storage.postLinkedPullRequest(linkedPullRequest).done(function() {
+                renderLinkedPullRequestsLink();
+            });
         });
-        storage.putReferencesToPullRequests(pullRequestJson, referencesToPullRequests);
     }
 
-    function removeReferenceToPullRequest(pullRequestJson, referenceToPullRequestId) {
-        var referencesToPullRequests = storage.getReferencesToPullRequests(pullRequestJson).filter(function(referenceToPullRequest) {
-            return referenceToPullRequest.id != referenceToPullRequestId;
+    function removeLinkedPullRequest(linkedPullRequestId) {
+        storage.deleteLinkedPullRequest(linkedPullRequestId).done(function() {
+            renderLinkedPullRequestsLink();   
         });
-        storage.putReferencesToPullRequests(pullRequestJson, referencesToPullRequests);
     }
 
 
@@ -74,11 +138,11 @@
     };
 
     /* Expose the client-context-provider function */
-    Facheris.LINKED_PULL_REQUESTS.getReferencesToPullRequestsStats = getReferencesToPullRequestsStats;
+    Facheris.LINKED_PULL_REQUESTS.getLinkedPullRequestsStats = getLinkedPullRequestsStats;
 
-    Facheris.LINKED_PULL_REQUESTS.addReferenceToPullRequest = addReferenceToPullRequest;
+    Facheris.LINKED_PULL_REQUESTS.addLinkedPullRequest = addLinkedPullRequest;
 
-    Facheris.LINKED_PULL_REQUESTS.removeReferenceToPullRequest = removeReferenceToPullRequest;
+    Facheris.LINKED_PULL_REQUESTS.removeLinkedPullRequest = removeLinkedPullRequest;
 
     function showDialog() {
         var dialog = showDialog._dialog;
@@ -109,7 +173,7 @@
                     };
                 }).value()
                 dialog.getCurrentPanel().body.html(
-                    me.facheris.referenceToPullRequestModal({
+                    me.facheris.linkedPullRequestModal({
                         projectOptions: projectOptions
                     })
                 );
@@ -124,7 +188,7 @@
     }
 
     function renderRepoSelect() {
-        var $form = $('#reference-to-pull-request-create-form');
+        var $form = $('#linked-pull-request-create-form');
         var projectKey = $form.find('#project').val();
         require([
             'bitbucket/util/navbuilder',
@@ -149,10 +213,8 @@
         });
     }
 
-    function renderReferencesToPullRequestsLink() {
-        var pr = require('bitbucket/internal/model/page-state').getPullRequest();
-        var newStats = Facheris.LINKED_PULL_REQUESTS.getReferencesToPullRequestsStats({ pullRequest : pr.toJSON() });
-        $('.mycompany-todos-link').replaceWith(me.facheris.prOverviewPanel(newStats));
+    function renderLinkedPullRequestsLink() {
+        Facheris.LINKED_PULL_REQUESTS.getLinkedPullRequestsStats();
     }
 
     /* use a live event to handle the link being clicked. */
@@ -161,12 +223,12 @@
         showDialog();
     });
 
-    $(document).on('change', '#reference-to-pull-request-create-form #project', function(e) {
+    $(document).on('change', '#linked-pull-request-create-form #project', function(e) {
         e.preventDefault();
         renderRepoSelect();
     });
 
-    $(document).on('submit', "#reference-to-pull-request-create-form", function(e) {
+    $(document).on('submit', "#linked-pull-request-create-form", function(e) {
         e.preventDefault();
         var pr = require('bitbucket/internal/model/page-state').getPullRequest();
 
@@ -174,23 +236,17 @@
         var $repo = AJS.$(this).find("#repo");
         var $number = AJS.$(this).find("#number");
         var text = $project.val() + '/' + $repo.val() + '#' + $number.val();
-        Facheris.LINKED_PULL_REQUESTS.addReferenceToPullRequest(
-            pr.toJSON(),
+        Facheris.LINKED_PULL_REQUESTS.addLinkedPullRequest(
             $project.val(),
             $repo.val(),
             $number.val()
         );
-        renderReferencesToPullRequestsLink();
     });
 
-    $(document).on('click', '.references-to-pull-requests-list .remove', function(e) {
+    $(document).on('click', '.linked-pull-requests-list .aui-icon-close', function(e) {
         e.preventDefault();
-        var referenceToPullRequestId = $(this).closest('li').attr('data-reference-to-pull-request-id');
+        var linkedPullRequestId = $(this).closest('li').attr('data-linked-pull-request-id');
 
-        var prJSON = require('bitbucket/internal/model/page-state').getPullRequest().toJSON();
-
-        Facheris.LINKED_PULL_REQUESTS.removeReferenceToPullRequest(prJSON, referenceToPullRequestId);
-
-        renderReferencesToPullRequestsLink();
+        Facheris.LINKED_PULL_REQUESTS.removeLinkedPullRequest(linkedPullRequestId);
     })
 }(AJS.$));

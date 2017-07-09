@@ -1,3 +1,13 @@
 .linked-pull-request-list .remove {
     margin-left: 10px;
 }
+
+ul.linked-pull-requests-list {
+    list-style-type: none;
+    margin-top:0px;
+    padding-left:26px;
+}
+
+ul.linked-pull-requests-list li {
+    margin: .1em 0;
+}

@@ -1,33 +1,55 @@
 {namespace me.facheris}
 
 /**
- * @param referencesToPullRequests
+ * @param linkedPullRequests
  */
-{template .prOverviewPanel}
+{template .linkedPullRequestsPanel}
     {call bitbucket.feature.pullRequest.relatedEntitiesWebPanel}
-        {param linkText: $referencesToPullRequests.length == 1 ? 'Reference to Another PR' : 'References To Other PRs' /}
+        {param linkText: $linkedPullRequests.length > 0 ? 'Linked' : 'Create Link' /}
         {param linkHref: '#' /}
-        {param iconClass: 'aui-icon aui-icon-small aui-iconfont-devtools-pull-request' /}
-        {param count: $referencesToPullRequests.length /}
+        {param iconClass: 'aui-icon aui-icon-small aui-iconfont-link' /}
+        {param count: $linkedPullRequests.length /}
         {param extraClasses: 'mycompany-todos-link'  /}
     {/call}
-    <ul class="references-to-pull-requests-list">
-        {foreach $referenceToPullRequest in $referencesToPullRequests}
-            <li data-reference-to-pull-request-id="{$referenceToPullRequest.id}">
-                <a href="{$referenceToPullRequest.link}">
-                    {$referenceToPullRequest.number}
-                </a>
-                <a class="aui-icon aui-icon-small aui-iconfont-close-dialog remove" href="#"></a>
+    <ul class="linked-pull-requests-list">
+        {foreach $linkedPullRequest in $linkedPullRequests}
+            <li data-linked-pull-request-id="{$linkedPullRequest.id}">
+                <span class="aui-lozenge aui-lozenge-subtle aui-lozenge-success">Merged</span>
+                &nbsp;
+                <span id="split-label" class="aui-label aui-label-closeable aui-label-split">
+                    <a class="aui-label-split-main" href="{$linkedPullRequest.link}">
+                        {$linkedPullRequest.project}/{$linkedPullRequest.slug}#{$linkedPullRequest.pullRequestId}
+                    </a>
+                    <span class="aui-label-split-close">
+                        <span tabindex="0" class="aui-icon aui-icon-close"></span>
+                    </span>
+                </span>
             </li>
         {/foreach}
     </ul>
 {/template}
 
 /**
+ * @param linkedPullRequests
+ * @param loading
+ */
+{template .prOverviewPanel}
+    <div id="linked-pull-requests-panel-container">
+        {if $loading}
+        <div class="button-spinner"></div>
+        {else}
+        {call .linkedPullRequestsPanel}
+            {param linkedPullRequests: $linkedPullRequests /}
+        {/call}
+        {/if}
+    </div>
+{/template}
+
+/**
  * @param projectOptions 
  */
-{template .referenceToPullRequestModal}
-    <form id="reference-to-pull-request-create-form" class="aui">
+{template .linkedPullRequestModal}
+    <form id="linked-pull-request-create-form" class="aui">
         <fieldset>
             {call aui.form.selectField }
                 {param id: 'project' /}
@@ -57,7 +79,7 @@
             {/call}
             <div class="buttons-container">
                 <div class="buttons">
-                    <input class="button submit" type="submit" value="Add" id="reference-to-pull-request-create-button">
+                    <input class="button submit" type="submit" value="Add" id="linked-pull-request-create-button">
                 </div>
             </div>
         </fieldset>

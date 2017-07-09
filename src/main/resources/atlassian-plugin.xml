@@ -1,37 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
-    <plugin-info>
-        <description>${project.description}</description>
-        <version>${project.version}</version>
-        <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="plugin-icon">images/pluginIcon.png</param>
-        <param name="plugin-logo">images/pluginLogo.png</param>
-        <permissions>
-            <permission>execute_java</permission>
-        </permissions>
-    </plugin-info>
-
-    <!-- add our i18n resource -->
-    <resource type="i18n" name="i18n" location="linked-pull-requests"/>
-
-    <!-- add our web resources -->
-    <client-web-panel name="Linked Pull Requests link" key="linked-pull-requests-panel" location="bitbucket.pull-request.related-entities" weight="2000">
-        <client-context-provider>Facheris.LINKED_PULL_REQUESTS.getReferencesToPullRequestsStats</client-context-provider>
-        <resource name="view" type="soy" location="me.facheris.bitbucket.plugins.linked-pull-requests:linked-pull-requests-resources/me.facheris.prOverviewPanel" />
-        <dependency>${atlassian.plugin.key}:linked-pull-requests-resources</dependency>
-    </client-web-panel>
-
-    <client-resource key="linked-pull-requests-resources" name="Linked Pull Requests Resources">
-        <directory location="/css/" />
-        <directory location="/js/" />
-        <directory location="/soy/" />
-
-        <dependency>com.atlassian.auiplugin:ajs</dependency>
-        <dependency>com.atlassian.auiplugin:aui-select2</dependency>
-        <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
-    </client-resource>
-
-    <rest key="linkedPullRequestsRest" path="/linked-pull-requests" version="1.0">
-        <description>Provides hello world services.</description>
-    </rest>
-
+  <plugin-info>
+    <description>${project.description}</description>
+    <version>${project.version}</version>
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+    <param name="plugin-icon">images/pluginIcon.png</param>
+    <param name="plugin-logo">images/pluginLogo.png</param>
+    <permissions>
+      <permission>execute_java</permission>
+    </permissions>
+  </plugin-info>
+  <!-- add our i18n resource -->
+  <resource type="i18n" name="i18n" location="linked-pull-requests"/>
+  <!-- add our web resources -->
+  <client-web-panel name="Linked Pull Requests link" key="linked-pull-requests-panel" location="bitbucket.pull-request.related-entities" weight="2000">
+    <client-context-provider>Facheris.LINKED_PULL_REQUESTS.getLinkedPullRequestsStats</client-context-provider>
+    <resource name="view" type="soy" location="me.facheris.bitbucket.plugins.linked-pull-requests:linked-pull-requests-resources/me.facheris.prOverviewPanel"/>
+    <dependency>${atlassian.plugin.key}:linked-pull-requests-resources</dependency>
+  </client-web-panel>
+  <client-resource key="linked-pull-requests-resources" name="Linked Pull Requests Resources">
+    <directory location="/css/"/>
+    <directory location="/js/"/>
+    <directory location="/soy/"/>
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <dependency>com.atlassian.auiplugin:aui-select2</dependency>
+    <dependency>com.atlassian.auiplugin:aui-labels</dependency>
+    <dependency>com.atlassian.bitbucket.server.bitbucket-web-api:pull-request-web-panels</dependency>
+  </client-resource>
+  <rest name="LinkedPullRequestsModel" i18n-name-key="linked-pull-requests-rest-resource.name" key="linked-pull-requests-rest-resource" path="/linked-pull-requests" version="1.0">
+    <description key="linked-pull-requests-rest-resource.description">The Linked Pull Requests Rest Resource Plugin</description>
+  </rest>
 </atlassian-plugin>
