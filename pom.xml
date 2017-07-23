@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.facheris.bitbucket.plugins</groupId>
     <artifactId>linked-pull-requests</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1</version>
     <organization>
         <name>Patrick Facheris</name>
         <url>http://facheris.me/</url>
