@@ -160,24 +160,80 @@ public class LinkedPullRequest {
                 link.direction == PullRequestLink.Direction.BIDIRECTIONAL &&
                 direction != link.direction
             ) {
-                link.direction = PullRequestLink.Direction.BIDIRECTIONAL;
+                this.updateLinkSimple(
+                    link, PullRequestLink.Direction.BIDIRECTIONAL
+                );
             } else {
                 // No changes
                 return null;
             }
-            this.removeLink(link.id);
         } else {
             link = new PullRequestLink(toPullRequest, direction);
-        }
         
-        this.settingsListInsert(
-            LinkedPullRequest.getStorageKey(this.root),
-            link.serialize()
-        );
+            this.settingsListInsert(
+                LinkedPullRequest.getStorageKey(this.root),
+                link.serialize()
+            );
+        }
         return link;
     }
 
-    public PullRequestLink removeLink(UUID id) {
+    public PullRequestLink removeLink(UUID id, PullRequestLink.Direction direction) {
+        PullRequestLink link = this.getById(id);
+        if (link == null) {
+            throw new IllegalArgumentException(
+                "Pull request link does not exist."
+            );
+        }
+
+        // Case where an attempt is made to remove a link type that doesn't
+        // exist.
+        if (
+            link.direction != direction &&
+            direction != PullRequestLink.Direction.BIDIRECTIONAL
+        ) {
+            throw new IllegalArgumentException(
+                "Cannot remove link in that direction as it does not exist."
+            );
+        }
+
+        // Get the other side of the link
+        PullRequest toPullRequest = link.target;
+        LinkedPullRequest targetLinkedPullRequest = new LinkedPullRequest(
+            toPullRequest, this.pluginSettings, this.pullRequestService
+        );
+        PullRequestLink targetPullRequestLink = targetLinkedPullRequest.getByPullRequest(
+            this.root
+        );
+        if (
+            link.direction == direction || (
+                direction == PullRequestLink.Direction.BIDIRECTIONAL &&
+                link.direction != PullRequestLink.Direction.BIDIRECTIONAL
+            )
+        ) {
+            // Simply remove both sides of the link
+            this.removeLinkSimple(id);
+            try {
+                targetLinkedPullRequest.removeLinkSimple(targetPullRequestLink.id);
+            } catch (IllegalArgumentException e) { }
+        } else if (link.direction == PullRequestLink.Direction.BIDIRECTIONAL) {
+            // Link direction is bidirectional but we're not doing a
+            // bidirectional remove, this is a special case in which we
+            // need to update directions as one side of the bidirectional
+            // link is broken
+            
+            // Get opposite direction of input as this is what the link
+            // should be updated to be
+            PullRequestLink.Direction oppositeDirection =
+                (direction == PullRequestLink.Direction.TO) ?
+                PullRequestLink.Direction.FROM : PullRequestLink.Direction.TO;
+            this.updateLinkSimple(link, oppositeDirection);
+            targetLinkedPullRequest.updateLinkSimple(targetPullRequestLink, direction);
+        }
+        return link;
+    }
+
+    public PullRequestLink removeLinkSimple(UUID id) {
         PullRequestLink link = this.getById(id);
         if (link == null) {
             return null;
@@ -189,6 +245,18 @@ public class LinkedPullRequest {
         return link;
     }
 
+    public void updateLinkSimple(
+        PullRequestLink link, PullRequestLink.Direction direction
+    ) {
+        String oldEntry = link.serialize();
+        link.direction = direction;
+        this.settingsListUpdate(
+            LinkedPullRequest.getStorageKey(this.root),
+            oldEntry,
+            link.serialize()
+        );
+    }
+
     private void settingsListInsert(String key, String entry) {
         List<String> entries = this.getPluginSettingsList(key);
         entries.add(entry);
@@ -198,6 +266,13 @@ public class LinkedPullRequest {
     private void settingsListRemove(String key, String entry) {
         List<String> entries = this.getPluginSettingsList(key);
         entries.remove(entry);
+        this.pluginSettings.put(key, entries);
+    }
+
+    private void settingsListUpdate(String key, String entry, String newEntry) {
+        List<String> entries = this.getPluginSettingsList(key);
+        entries.remove(entry);
+        entries.add(entry);
         this.pluginSettings.put(key, entries);
     }
 }

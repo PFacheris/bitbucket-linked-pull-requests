@@ -14,7 +14,7 @@
     <ul class="linked-pull-requests-list">
         {foreach $linkedPullRequest in $linkedPullRequests}
             <li data-linked-pull-request-id="{$linkedPullRequest.id}">
-                <span class="aui-lozenge aui-lozenge-subtle aui-lozenge-success">Merged</span>
+                <span class="aui-lozenge aui-lozenge-subtle {$linkedPullRequest.state != 'OPEN' ? ($linkedPullRequest.state == 'MERGED' ? 'aui-lozenge-success' : 'aui-lozenge-error') : ''}">{$linkedPullRequest.state}</span>
                 &nbsp;
                 <span id="split-label" class="aui-label aui-label-closeable aui-label-split">
                     <a class="aui-label-split-main" href="{$linkedPullRequest.link}">

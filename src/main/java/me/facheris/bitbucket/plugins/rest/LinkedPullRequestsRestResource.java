@@ -30,6 +30,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -137,8 +138,25 @@ public class LinkedPullRequestsRestResource
         @PathParam("project") String projectKey,
         @PathParam("slug") String slug,
         @PathParam("pullRequestId") Long pullRequestId,
-        @PathParam("id") UUID id
+        @PathParam("id") UUID id,
+        @QueryParam("direction") String directionParam 
     ) {
+        directionParam = directionParam.toLowerCase();
+        PullRequestLink.Direction direction;
+        if (directionParam.equals("to")) {
+            direction = PullRequestLink.Direction.TO;
+        } else if (directionParam.equals("from")) {
+            direction = PullRequestLink.Direction.FROM;
+        } else if (directionParam.equals("bidirectional")) {
+            direction = PullRequestLink.Direction.BIDIRECTIONAL;
+        } else {
+            return Response.status(422)
+                .entity(new ErrorRestResourceModel("Error Deleting Link",
+                    "Invalid direction parameter."            
+                ))
+                .build();
+        }
+
         PullRequest pullRequest = this.getPullRequest(projectKey, slug, pullRequestId); 
         if (pullRequest == null) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -154,7 +172,7 @@ public class LinkedPullRequestsRestResource
         LinkedPullRequest linkedPullRequest = new LinkedPullRequest(
             pullRequest, this.pluginSettings, this.pullRequestService
         );
-        if (linkedPullRequest.removeLink(id) == null) {
+        if (linkedPullRequest.removeLink(id, direction) == null) {
             return Response.status(Response.Status.NOT_FOUND)
                 .entity(new ErrorRestResourceModel("Error Deleting Link", 
                     "No link with the given ID exists."

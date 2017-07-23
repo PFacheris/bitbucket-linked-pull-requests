@@ -69,7 +69,7 @@
             })
             .fail(function(data) {
                 deferred.reject(data);
-                return data
+                return data;
             });
             return deferred.promise();
         },
@@ -79,6 +79,9 @@
                 .rest('linked-pull-requests')
                 .currentPullRequest()
                 .addPathComponents('linked', id)
+                .withParams({
+                    'direction': 'bidirectional' 
+                })
                 .build();
             require('bitbucket/util/server').rest({
                 url: url,

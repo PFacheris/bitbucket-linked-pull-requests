@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.atlassian.bitbucket.pull.PullRequest;
 import com.atlassian.bitbucket.pull.PullRequestService;
+import com.atlassian.bitbucket.pull.PullRequestState;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +76,11 @@ public class PullRequestLink {
     @XmlElementRef(name="direction")
     public String getDirection() {
         return this.direction.toString();
+    }
+
+    @XmlElementRef(name="state")
+    public String getState() {
+        return this.target.getState().toString();
     }
 
     public String serialize() {
