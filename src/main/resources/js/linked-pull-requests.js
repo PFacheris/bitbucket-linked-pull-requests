@@ -147,6 +147,28 @@
 
     Facheris.LINKED_PULL_REQUESTS.removeLinkedPullRequest = removeLinkedPullRequest;
 
+    var get_pages = function(url, start, limit, callback, values) {
+        values = typeof values !== 'undefined' ? values : []
+
+        var params = {'limit': limit, 'start': start};
+        require([
+            'bitbucket/util/server'
+        ], function(server){
+            server.rest({
+                type : 'GET',
+                url : url,
+                data: params
+            }).done(function(response) {
+                values = values.concat(response['values']);
+                if (response['isLastPage']) {
+                    callback(values);
+                } else {
+                    get_pages(url, response['nextPageStart'], response['limit'], callback, values);
+                }
+            });
+        });
+    };
+
     function showDialog() {
         var dialog = showDialog._dialog;
         if (!dialog) {
@@ -158,24 +180,8 @@
                 });
         }
 
-        require([
-            'bitbucket/util/navbuilder',
-            'bitbucket/util/server'
-        ], function(nav, server){
-            server.rest({
-                type : 'GET',
-                url : nav.rest().addPathComponents('projects').build()
-            }).done(function(response) {
-                var projectOptions = _.chain(response['values']
-                ).filter(function(project){
-                    return project['type'] == 'NORMAL';
-                }).map(function(project) {
-                    return {
-                        'text': project['name'],
-                        'value': project['key']
-                    };
-                }).value()
-                dialog.getCurrentPanel().body.html(
+        var render = function(projectOptions) {
+            dialog.getCurrentPanel().body.html(
                     me.facheris.linkedPullRequestModal({
                         projectOptions: projectOptions
                     })
@@ -186,6 +192,24 @@
                 var $dialog = dialog.getCurrentPanel().body
                 $dialog.find('#project').auiSelect2();
                 renderRepoSelect();
+        };
+
+        // Make API request
+        require([
+            'bitbucket/util/navbuilder',
+        ], function(nav){ 
+            var url = nav.rest().addPathComponents('projects').build();
+            get_pages(url, 0, 25, function(values) {
+                var projectOptions = _.chain(values
+                ).filter(function(project){
+                    return project['type'] == 'NORMAL';
+                }).map(function(project) {
+                    return {
+                        'text': project['name'],
+                        'value': project['key']
+                    };
+                }).value();
+                render(projectOptions);
             });
         });
     }
@@ -195,14 +219,11 @@
         var projectKey = $form.find('#project').val();
         require([
             'bitbucket/util/navbuilder',
-            'bitbucket/util/server'
         ], function(nav, server){
-            server.rest({
-                type : 'GET',
-                url : nav.rest().project(projectKey).allRepos().build()
-            }).done(function(response) {
+            var url = nav.rest().project(projectKey).allRepos().build();
+            get_pages(url, 0, 25, function(values) {
                 var $repoField = $form.find('#repo');
-                var data = _.map(response['values'], function(repo) {
+                var data = _.map(values, function(repo) {
                     return {
                         id: repo['slug'],
                         text: repo['name']
