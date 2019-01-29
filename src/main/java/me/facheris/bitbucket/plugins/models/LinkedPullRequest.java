@@ -1,22 +1,17 @@
 package me.facheris.bitbucket.plugins.models;
 
+import com.atlassian.bitbucket.pull.PullRequest;
+import com.atlassian.bitbucket.pull.PullRequestService;
+import com.atlassian.sal.api.pluginsettings.PluginSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElementRef;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.atlassian.bitbucket.pull.PullRequest;
-import com.atlassian.bitbucket.pull.PullRequestService;
-
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
-
-import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
-import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
-
-import javax.xml.bind.annotation.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * Represents all links to/from a specific pull request.

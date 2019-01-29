@@ -1,28 +1,16 @@
 package me.facheris.bitbucket.plugins.rest;
 
-import me.facheris.bitbucket.plugins.models.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URI;
-
-import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
-import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.atlassian.bitbucket.pull.PullRequest;
 import com.atlassian.bitbucket.pull.PullRequestService;
-import com.atlassian.bitbucket.repository.RepositoryService;
 import com.atlassian.bitbucket.repository.Repository;
-
+import com.atlassian.bitbucket.repository.RepositoryService;
+import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import me.facheris.bitbucket.plugins.models.LinkedPullRequest;
+import me.facheris.bitbucket.plugins.models.PullRequestLink;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -33,9 +21,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 
-@Scanned
+@Component
 @Path("/projects/{project}/repos/{slug}/pull-requests/{pullRequestId}")
 public class LinkedPullRequestsRestResource
 {

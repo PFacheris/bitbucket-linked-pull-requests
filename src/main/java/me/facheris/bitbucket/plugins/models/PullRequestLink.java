@@ -1,15 +1,14 @@
 package me.facheris.bitbucket.plugins.models;
 
-import java.util.UUID;
-
 import com.atlassian.bitbucket.pull.PullRequest;
 import com.atlassian.bitbucket.pull.PullRequestService;
-import com.atlassian.bitbucket.pull.PullRequestState;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElementRef;
+import java.util.UUID;
 
 /*
  * Represents a unique link from an origin PullRequest to a target PullRequest
