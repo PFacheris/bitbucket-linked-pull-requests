@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.facheris.bitbucket.plugins</groupId>
     <artifactId>linked-pull-requests</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <organization>
         <name>Patrick Facheris</name>
         <url>http://facheris.me/</url>
@@ -27,7 +27,6 @@
         <dependency>
             <groupId>com.atlassian.plugins</groupId>
             <artifactId>atlassian-plugins-webfragment</artifactId>
-            <version>3.0.9</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -71,13 +70,7 @@
             <groupId>com.atlassian.plugin</groupId>
             <artifactId>atlassian-spring-scanner-annotation</artifactId>
             <version>${atlassian.spring.scanner.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.atlassian.plugin</groupId>
-            <artifactId>atlassian-spring-scanner-runtime</artifactId>
-            <version>${atlassian.spring.scanner.version}</version>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -112,7 +105,6 @@
         <dependency>
             <groupId>com.atlassian.plugins.rest</groupId>
             <artifactId>atlassian-rest-common</artifactId>
-            <version>1.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -130,8 +122,6 @@
                 <version>${amps.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <enableQuickReload>true</enableQuickReload>
-                    <enableFastdev>false</enableFastdev>
                     <products>
                         <product>
                             <id>bitbucket</id>
@@ -143,7 +133,7 @@
                     <instructions>
                         <Atlassian-Plugin-Key>${atlassian.plugin.key}</Atlassian-Plugin-Key>
                         <!-- Add package to export here -->
-                        <Export-Package>me.facheris.bitbucket.plugins,</Export-Package>
+                        <Export-Package>me.facheris.bitbucket.plugins.*,</Export-Package>
                         <!-- Add package import here -->
                         <Import-Package>org.springframework.osgi.*;resolution:="optional", org.eclipse.gemini.blueprint.*;resolution:="optional", *</Import-Package>
                         <!-- Ensure plugin is Spring powered -->
@@ -176,12 +166,15 @@
         </plugins>
     </build>
     <properties>
-        <bitbucket.version>4.11.0</bitbucket.version>
-        <bitbucket.data.version>4.11.0</bitbucket.data.version>
-        <amps.version>6.2.11</amps.version>
+        <bitbucket.version>5.14.0</bitbucket.version>
+        <bitbucket.data.version>5.14.0</bitbucket.data.version>
+        <amps.version>6.3.21</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
-        <atlassian.spring.scanner.version>1.2.13</atlassian.spring.scanner.version>
+        <atlassian.spring.scanner.version>2.1.3</atlassian.spring.scanner.version>
         <!-- This key is used to keep the consistency between the key in atlassian-plugin.xml and the key to generate bundle. -->
         <atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 </project>
