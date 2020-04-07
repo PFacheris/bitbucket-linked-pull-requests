@@ -4,7 +4,7 @@
  * @param linkedPullRequests
  */
 {template .linkedPullRequestsPanel}
-    {call bitbucket.feature.pullRequest.relatedEntitiesWebPanel}
+    {call bitbucket.feature.pullRequest.pullRequestWebPanels.relatedEntitiesWebPanel}
         {param linkText: $linkedPullRequests.length > 0 ? 'Linked' : 'Create Link' /}
         {param linkHref: '#' /}
         {param iconClass: 'aui-icon aui-icon-small aui-iconfont-link' /}

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.facheris.bitbucket.plugins</groupId>
     <artifactId>linked-pull-requests</artifactId>
-    <version>0.3</version>
+    <version>0.4</version>
     <organization>
         <name>Patrick Facheris</name>
         <url>http://facheris.me/</url>
@@ -31,6 +31,19 @@
         <pluginRepository>
           <id>atlassian-public</id>
           <url>https://packages.atlassian.com/maven-public/</url>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+            <checksumPolicy>warn</checksumPolicy>
+          </snapshots>
+           <releases>
+             <enabled>true</enabled>
+             <checksumPolicy>warn</checksumPolicy>
+          </releases>
+        </pluginRepository>
+        <pluginRepository>
+          <id>atlassian-external</id>
+          <url>https://packages.atlassian.com/content/groups/public/</url>
           <snapshots>
             <enabled>true</enabled>
             <updatePolicy>never</updatePolicy>
@@ -100,6 +113,11 @@
             <groupId>com.atlassian.plugin</groupId>
             <artifactId>atlassian-spring-scanner-annotation</artifactId>
             <version>${atlassian.spring.scanner.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -196,8 +214,8 @@
         </plugins>
     </build>
     <properties>
-        <bitbucket.version>5.14.0</bitbucket.version>
-        <bitbucket.data.version>5.14.0</bitbucket.data.version>
+        <bitbucket.version>6.10.2</bitbucket.version>
+        <bitbucket.data.version>6.10.2</bitbucket.data.version>
         <amps.version>6.3.21</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
         <atlassian.spring.scanner.version>2.1.8</atlassian.spring.scanner.version>
