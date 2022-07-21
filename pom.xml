@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.facheris.bitbucket.plugins</groupId>
     <artifactId>linked-pull-requests</artifactId>
-    <version>0.4</version>
+    <version>0.4.1</version>
     <organization>
         <name>Patrick Facheris</name>
         <url>http://facheris.me/</url>
@@ -118,6 +118,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>5.3.22</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
